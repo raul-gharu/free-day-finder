@@ -61,7 +61,14 @@ function loadSampleData() {
   dad.offDays = 4;
   dad.blockAnchor = isoToday();
 
-  state.people = [mum, dad];
+  const brother = defaultPerson('Brother', 2);
+  brother.color = PALETTE[2];
+  brother.mode = 'block';
+  brother.onDays = 6;
+  brother.offDays = 2;
+  brother.blockAnchor = isoToday();
+
+  state.people = [mum, dad, brother];
   state.selId = mum.id;
   render();
 }
