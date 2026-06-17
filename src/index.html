@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Free Day Finder — discover which days everyone on a rota is off. Supports fixed weekly, rotating multi-week and rolling block shift patterns."
+    />
+    <title>Free Day Finder</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700,900&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles/main.css" />
+  </head>
+  <body>
+    <div class="wrap">
+      <header class="app">
+        <div class="brand">
+          <svg
+            width="30"
+            height="30"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <rect x="3" y="4" width="18" height="18" rx="3" />
+            <path d="M3 9h18M8 2v4M16 2v4" />
+            <path d="M9 15l2 2 4-4" />
+          </svg>
+          <div>
+            <h1>Free Day Finder</h1>
+            <p>Find the days when everyone is off</p>
+          </div>
+        </div>
+        <button class="toggle" data-theme-toggle aria-label="Switch theme"></button>
+      </header>
+
+      <div class="layout">
+        <aside class="panel">
+          <h2>People</h2>
+          <p class="sub">Add everyone, then click a person to set their rota.</p>
+          <div class="addrow">
+            <input id="nameInput" type="text" placeholder="e.g. Mum" aria-label="Person's name" />
+            <button class="btn btn-primary" id="addBtn">Add</button>
+          </div>
+          <div class="people" id="peopleList"></div>
+          <button
+            class="btn btn-ghost"
+            id="sampleBtn"
+            style="margin-top: var(--space-4); width: 100%"
+          >
+            Load Mum &amp; Dad example
+          </button>
+        </aside>
+
+        <main class="panel" style="background: var(--color-surface-2)">
+          <div class="tabs" role="tablist">
+            <button class="tab active" data-tab="schedule" role="tab">Rota editor</button>
+            <button class="tab" data-tab="calendar" role="tab">Free calendar</button>
+            <button class="tab" data-tab="list" role="tab">Free dates list</button>
+          </div>
+
+          <div id="tab-schedule" role="tabpanel"></div>
+
+          <div id="tab-calendar" role="tabpanel" hidden>
+            <div class="month-nav">
+              <button id="prevM" aria-label="Previous month">‹</button>
+              <h3 id="monthLabel"></h3>
+              <button id="nextM" aria-label="Next month">›</button>
+            </div>
+            <div class="ctrlbar" style="margin-bottom: var(--space-3)">
+              <div class="legend">
+                <span><i class="swatch sw-free"></i> Everyone free</span>
+                <span><i class="swatch sw-busy"></i> Someone working</span>
+              </div>
+            </div>
+            <div class="cal" id="calGrid"></div>
+          </div>
+
+          <div id="tab-list" role="tabpanel" hidden>
+            <div class="ctrlbar">
+              <div>
+                <label for="rangeStart">From</label>
+                <input type="date" id="rangeStart" />
+              </div>
+              <div>
+                <label for="rangeEnd">To</label>
+                <input type="date" id="rangeEnd" />
+              </div>
+            </div>
+            <p class="summary" id="listSummary"></p>
+            <div class="result-list" id="resultList"></div>
+            <div class="exp">
+              <button class="btn btn-ghost" id="exportBtn">Download free dates (CSV)</button>
+              <p class="hint">Calculated day-by-day, so rotating shifts are fully accounted for.</p>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+
+    <script type="module" src="./main.js"></script>
+  </body>
+</html>

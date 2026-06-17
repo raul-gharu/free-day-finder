@@ -1,0 +1,36 @@
+{
+  "name": "free-day-finder",
+  "version": "1.0.0",
+  "description": "Find days when everyone on a rota is off — supports fixed weekly, rotating multi-week and rolling block shift patterns.",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint \"src/**/*.js\" \"tests/**/*.js\"",
+    "lint:fix": "eslint \"src/**/*.js\" \"tests/**/*.js\" --fix",
+    "format": "prettier --write \"**/*.{js,css,html,json,md}\"",
+    "format:check": "prettier --check \"**/*.{js,css,html,json,md}\""
+  },
+  "keywords": [
+    "rota",
+    "shift-planner",
+    "scheduling",
+    "calendar",
+    "vanilla-js"
+  ],
+  "author": "Raul",
+  "license": "MIT",
+  "devDependencies": {
+    "eslint": "^9.10.0",
+    "@eslint/js": "^9.10.0",
+    "globals": "^15.9.0",
+    "prettier": "^3.3.3",
+    "vite": "^5.4.6",
+    "vitest": "^2.1.1",
+    "jsdom": "^25.0.0"
+  }
+}
