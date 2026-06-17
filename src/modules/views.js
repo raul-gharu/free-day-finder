@@ -40,13 +40,13 @@ export function renderPeople(state) {
   const el = document.getElementById('peopleList');
   if (!state.people.length) {
     el.innerHTML =
-      '<div class="empty"><p>No people yet. Add someone, or load the Mum & Dad example.</p></div>';
+      '<div class="empty"><p>No people yet. Add someone, or load the family example.</p></div>';
     return;
   }
   el.innerHTML = state.people
     .map(
       (p) =>
-        `<div class="person ${p.id === state.selId ? 'sel' : ''}" data-sel="${p.id}"><span class="dot" style="background:${p.color}"></span><span class="nm">${esc(p.name)}</span><span class="cnt">${summarise(p)}</span><button class="del" data-del="${p.id}" aria-label="Remove ${esc(p.name)}">✕</button></div>`,
+        `<div class="person ${p.id === state.selId ? 'sel' : ''}" data-sel="${p.id}"><span class="dot" style="background:${p.color}"></span><span class="nm">${esc(p.name)}</span><span class="cnt">${summarise(p)}</span><button class="del" data-del="${p.id}" aria-label="Remove ${esc(p.name)}">&#x2715;</button></div>`,
     )
     .join('');
 }
