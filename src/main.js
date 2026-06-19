@@ -55,9 +55,12 @@ function loadSampleData() {
 
   const mum = defaultPerson('Mum', 0);
   mum.mode = 'rotweek';
+  // weeks array uses JS day order: [Sun, Mon, Tue, Wed, Thu, Fri, Sat]
+  // Week 1: works Mon, Tue, Sat, Sun — off Wed, Thu, Fri
+  // Week 2: works Wed, Thu, Fri     — off Mon, Tue, Sat, Sun
   mum.weeks = [
-    [false, true, true, false, false, false, true],
-    [false, false, false, true, true, true, false],
+    [true,  true,  true,  false, false, false, true],
+    [false, false, false, true,  true,  true,  false],
   ];
   mum.rotAnchor = mondayOf(new Date());
 
