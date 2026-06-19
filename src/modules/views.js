@@ -63,6 +63,48 @@ function renderConstrainedUI(p) {
   `;
 }
 
+// ---------------------------------------------------------------------------
+// Calendar filter helpers
+// ---------------------------------------------------------------------------
+
+/**
+ * Return the subset of people to use for the calendar/list,
+ * based on state.calFilter (a Set of person IDs).
+ * An empty set means "all selected".
+ */
+export function filteredPeople(state) {
+  if (!state.calFilter || state.calFilter.size === 0) return state.people;
+  return state.people.filter((p) => state.calFilter.has(p.id));
+}
+
+function renderFilterBar(state) {
+  if (!state.people.length) return '';
+  const allSelected = !state.calFilter || state.calFilter.size === 0;
+  const btns = state.people
+    .map((p) => {
+      const active = allSelected ? false : state.calFilter.has(p.id);
+      return `<button
+        class="person-filter-btn ${active ? 'pf-active' : ''}"
+        data-filter-id="${p.id}"
+        style="--pf-color:${p.color}"
+        aria-pressed="${active}"
+      ><span class="pf-dot"></span>${esc(p.name)}</button>`;
+    })
+    .join('');
+
+  const allBtn = `<button
+    class="person-filter-btn pf-all ${allSelected ? 'pf-active' : ''}"
+    data-filter-all
+    aria-pressed="${allSelected}"
+  >Everyone</button>`;
+
+  return `<div class="cal-filter-bar">${allBtn}${btns}</div>`;
+}
+
+// ---------------------------------------------------------------------------
+// Exported renderers
+// ---------------------------------------------------------------------------
+
 export function renderPeople(state) {
   const el = document.getElementById('peopleList');
   if (!state.people.length) {
@@ -134,10 +176,26 @@ export function renderSchedule(state) {
 }
 
 export function renderCal(state) {
+  // Month label
   document.getElementById('monthLabel').textContent = state.calMonth.toLocaleDateString('en-GB', {
     month: 'long',
     year: 'numeric',
   });
+
+  // Filter bar — injected just above the month-nav inside tab-calendar
+  const calTab = document.getElementById('tab-calendar');
+  let filterEl = calTab.querySelector('.cal-filter-bar');
+  // Remove old bar and re-inject so it always reflects latest people list
+  if (filterEl) filterEl.remove();
+  const barHtml = renderFilterBar(state);
+  if (barHtml) {
+    const monthNav = calTab.querySelector('.month-nav');
+    monthNav.insertAdjacentHTML('beforebegin', barHtml);
+  }
+
+  // Determine which people to use
+  const people = filteredPeople(state);
+
   const grid = document.getElementById('calGrid');
   let html = DOW_ORDER.map((i) => `<div class="dow">${DOW[i]}</div>`).join('');
   const startPad = (state.calMonth.getDay() + 6) % 7;
@@ -145,11 +203,11 @@ export function renderCal(state) {
   for (let i = 0; i < startPad; i++) html += '<div class="cell pad"></div>';
   for (let d = 1; d <= dim; d++) {
     const date = new Date(state.calMonth.getFullYear(), state.calMonth.getMonth(), d);
-    const free = isFree(state.people, date);
+    const free = isFree(people, date);
     const mini =
-      !free && state.people.length
+      !free && people.length
         ? '<div class="mini">' +
-          state.people
+          people
             .filter((p) => worksOn(p, date))
             .map((p) => `<i style="background:${p.color}"></i>`)
             .join('') +
@@ -166,7 +224,9 @@ export function renderList(state) {
   const out = document.getElementById('resultList');
   const sumEl = document.getElementById('listSummary');
 
-  if (!s || !e || !state.people.length) {
+  const people = filteredPeople(state);
+
+  if (!s || !e || !people.length) {
     out.innerHTML =
       '<div class="empty"><p>Add people and pick a date range to see every day all of them are free.</p></div>';
     sumEl.textContent = '';
@@ -177,9 +237,9 @@ export function renderList(state) {
   const start = parseISO(s);
   const end = parseISO(e);
   const total = Math.floor((end - start) / MS_PER_DAY) + 1;
-  const frees = findFreeDates(state.people, start, end);
+  const frees = findFreeDates(people, start, end);
 
-  sumEl.innerHTML = `<b>${frees.length}</b> shared free day${frees.length !== 1 ? 's' : ''} out of ${total} across ${state.people.length} ${state.people.length === 1 ? 'person' : 'people'}.`;
+  sumEl.innerHTML = `<b>${frees.length}</b> shared free day${frees.length !== 1 ? 's' : ''} out of ${total} across ${people.length} ${people.length === 1 ? 'person' : 'people'}.`;
 
   out.innerHTML = frees.length
     ? frees

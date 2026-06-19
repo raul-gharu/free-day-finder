@@ -20,6 +20,9 @@ const state = {
     return d;
   })(),
   lastFrees: [],
+  // Set of person IDs currently selected in the calendar filter.
+  // Empty set = "Everyone" (all selected).
+  calFilter: new Set(),
 };
 
 function render() {
@@ -39,12 +42,15 @@ function addPerson(name) {
 
 function removePerson(id) {
   state.people = state.people.filter((p) => p.id !== id);
+  // Clean up filter if that person was selected
+  state.calFilter.delete(id);
   if (state.selId === id) state.selId = state.people[0]?.id ?? null;
   render();
 }
 
 function loadSampleData() {
   state.people = [];
+  state.calFilter = new Set();
   resetIds();
 
   const mum = defaultPerson('Mum', 0);
@@ -225,6 +231,33 @@ document.getElementById('tab-schedule').addEventListener('change', (e) => {
   if (e.target.matches('[data-cfirstoff]')) {
     p.cFirstOff = e.target.value;
     render();
+  }
+});
+
+// Calendar filter — delegated from the tab-calendar panel
+document.getElementById('tab-calendar').addEventListener('click', (e) => {
+  // "Everyone" button — clear filter
+  if (e.target.closest('[data-filter-all]')) {
+    state.calFilter = new Set();
+    renderCal(state);
+    renderList(state);
+    return;
+  }
+  // Individual person button
+  const btn = e.target.closest('[data-filter-id]');
+  if (btn) {
+    const id = +btn.dataset.filterId;
+    if (state.calFilter.has(id)) {
+      state.calFilter.delete(id);
+    } else {
+      state.calFilter.add(id);
+    }
+    // If all individuals are now selected, normalise back to "Everyone"
+    if (state.calFilter.size === state.people.length) {
+      state.calFilter = new Set();
+    }
+    renderCal(state);
+    renderList(state);
   }
 });
 
