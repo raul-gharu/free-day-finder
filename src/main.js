@@ -46,6 +46,7 @@ function removePerson(id) {
 function loadSampleData() {
   state.people = [];
   resetIds();
+
   const mum = defaultPerson('Mum', 0);
   mum.mode = 'rotweek';
   mum.weeks = [
@@ -63,10 +64,12 @@ function loadSampleData() {
 
   const brother = defaultPerson('Brother', 2);
   brother.color = PALETTE[2];
-  brother.mode = 'block';
-  brother.onDays = 6;
-  brother.offDays = 2;
-  brother.blockAnchor = isoToday();
+  brother.mode = 'constrained';
+  brother.cMinWork = 7;
+  brother.cOffLen = 2;
+  brother.cFirstOff = isoToday();
+  // Wed=2, Thu=3 in Mon-first order (Mon=0)
+  brother.cForbidStart = [2, 3];
 
   state.people = [mum, dad, brother];
   state.selId = mum.id;
@@ -178,6 +181,17 @@ document.getElementById('tab-schedule').addEventListener('click', (e) => {
     p.weeks.push([false, true, true, true, true, true, false]);
     render();
   }
+
+  // Constrained mode: toggle forbidden start day
+  const cfd = e.target.closest('[data-cfd]');
+  if (cfd) {
+    const day = +cfd.dataset.cfd;
+    const idx = p.cForbidStart.indexOf(day);
+    if (idx === -1) p.cForbidStart.push(day);
+    else p.cForbidStart.splice(idx, 1);
+    render();
+    return;
+  }
 });
 
 document.getElementById('tab-schedule').addEventListener('change', (e) => {
@@ -197,6 +211,19 @@ document.getElementById('tab-schedule').addEventListener('change', (e) => {
   }
   if (e.target.matches('[data-blockanchor]')) {
     p.blockAnchor = e.target.value;
+    render();
+  }
+  // Constrained mode fields
+  if (e.target.matches('[data-cminwork]')) {
+    p.cMinWork = Math.max(1, +e.target.value || 1);
+    render();
+  }
+  if (e.target.matches('[data-cofflen]')) {
+    p.cOffLen = Math.max(1, +e.target.value || 1);
+    render();
+  }
+  if (e.target.matches('[data-cfirstoff]')) {
+    p.cFirstOff = e.target.value;
     render();
   }
 });

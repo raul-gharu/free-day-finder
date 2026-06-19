@@ -11,6 +11,8 @@ import { worksOn, isFree, summarise, findFreeDates } from './schedule.js';
 import { PRESETS } from './presets.js';
 import { esc } from './people.js';
 
+const DOW_MON = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
 function chips(arr, attr) {
   return DOW_ORDER.map(
     (i) =>
@@ -34,6 +36,31 @@ function renderPresets() {
     ).join('') +
     '</div></div>'
   );
+}
+
+function renderConstrainedUI(p) {
+  const forbidChips = DOW_MON.map((name, i) => {
+    const active = (p.cForbidStart || []).includes(i);
+    return `<button class="day-chip ${active ? 'on' : ''}" data-cfd="${i}" title="Toggle forbidden off-start: ${name}">${name}<span class="chip-state">${active ? 'Forbidden' : 'Allowed'}</span></button>`;
+  }).join('');
+
+  return `
+    <div class="field">
+      <label>Constrained rolling block</label>
+      <div class="row">
+        <div><span class="minilabel">Min days ON (working)</span><input type="number" min="1" max="60" data-cminwork value="${p.cMinWork}"></div>
+        <div><span class="minilabel">Days OFF per break</span><input type="number" min="1" max="14" data-cofflen value="${p.cOffLen}"></div>
+        <div><span class="minilabel">First day off</span><input type="date" data-cfirstoff value="${p.cFirstOff}"></div>
+      </div>
+      <small>Working run is at least ${p.cMinWork} days. If the next off block would start on a forbidden day, the start shifts forward (making that working run longer).</small>
+    </div>
+    <div class="weekblock">
+      <div class="wlabel">Forbidden off-start days
+        <span class="quick" style="font-weight:400;font-size:.78rem;color:var(--color-text-muted);"> — off blocks may never begin on these days</span>
+      </div>
+      <div class="daysrow">${forbidChips}</div>
+    </div>
+  `;
 }
 
 export function renderPeople(state) {
@@ -71,6 +98,8 @@ export function renderSchedule(state) {
       )
       .join('');
     body += `<div class="field"><div class="row"><button class="btn btn-ghost" data-addweek>+ Add another week</button><div><span class="minilabel">Rota started week of</span><input type="date" data-rotanchor value="${p.rotAnchor}"></div></div><small>The pattern repeats every ${p.weeks.length} weeks from this date.</small></div>`;
+  } else if (p.mode === 'constrained') {
+    body = renderConstrainedUI(p);
   } else {
     body = `<div class="field"><label>Rolling block pattern</label><div class="row"><div><span class="minilabel">Days ON (working)</span><input type="number" min="1" max="30" data-on value="${p.onDays}"></div><div><span class="minilabel">Days OFF</span><input type="number" min="1" max="30" data-off value="${p.offDays}"></div><div><span class="minilabel">First working day</span><input type="date" data-blockanchor value="${p.blockAnchor}"></div></div><small>Repeats every ${p.onDays + p.offDays} days, ignoring weekdays.</small></div>`;
   }
@@ -91,6 +120,7 @@ export function renderSchedule(state) {
       <button class="mode-btn ${p.mode === 'weekly' ? 'on' : ''}" data-mode="weekly"><span class="t">Same every week</span><span class="d">Fixed Mon–Sun pattern</span></button>
       <button class="mode-btn ${p.mode === 'rotweek' ? 'on' : ''}" data-mode="rotweek"><span class="t">Rotating weeks</span><span class="d">2, 3 or 4-week cycle</span></button>
       <button class="mode-btn ${p.mode === 'block' ? 'on' : ''}" data-mode="block"><span class="t">Rolling blocks</span><span class="d">N on / M off</span></button>
+      <button class="mode-btn ${p.mode === 'constrained' ? 'on' : ''}" data-mode="constrained"><span class="t">Constrained block</span><span class="d">Shifts off-start past forbidden days</span></button>
     </div>
     ${renderPresets()}
     <div class="daykey">

@@ -35,6 +35,11 @@ export function defaultPerson(name, colourIndex = 0) {
     onDays: 4,
     offDays: 4,
     blockAnchor: isoToday(),
+    // Constrained block fields
+    cMinWork: 7,
+    cOffLen: 2,
+    cFirstOff: isoToday(),
+    cForbidStart: [],
   };
 }
 
